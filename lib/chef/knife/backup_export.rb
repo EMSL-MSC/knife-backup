@@ -116,7 +116,11 @@ module ServerBackup
           ui.error "Could not load #{klass} #{component_name}."
           next
         end
-		component_hash = component_obj.for_json
+		if component_obj.respond_to? :for_json 
+		  component_hash = component_obj.for_json
+        else
+          component_hash = component_obj.to_hash
+        end
 		filter.each do |f|
           component_hash.delete(f)
         end
