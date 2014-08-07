@@ -65,7 +65,7 @@ module ServerBackup
     end
 
     def nodes
-      backup_standard("nodes", Chef::Node)
+      backup_standard("nodes", Chef::Node,["automatic","default"])
     end
 
     def clients
@@ -104,7 +104,7 @@ module ServerBackup
       end
     end
 
-    def backup_standard(component, klass)
+    def backup_standard(component, klass,filter=[])
       ui.msg "Backing up #{component}"
       dir = File.join(config[:backup_dir], component)
       FileUtils.mkdir_p(dir)
@@ -116,8 +116,12 @@ module ServerBackup
           ui.error "Could not load #{klass} #{component_name}."
           next
         end
+		component_hash = component_obj.for_json
+		filter.each do |f|
+          component_hash.delete(f)
+        end
         File.open(File.join(dir, "#{component_name}.json"), "w") do |component_file|
-          component_file.print(JSON.pretty_generate(component_obj))
+          component_file.print(JSON.pretty_generate(component_hash))
         end
       end
     end
